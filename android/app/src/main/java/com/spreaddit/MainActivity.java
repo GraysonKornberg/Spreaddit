@@ -3,8 +3,12 @@ package com.spreaddit;
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;
 import com.facebook.react.ReactRootView;
-
-public class MainActivity extends ReactActivity {
+import com.rnfs.RNFSPackage;
+import android.os.Bundle;
+import com.facebook.react.ReactInstanceManager;
+import com.facebook.react.shell.MainReactPackage;
+import com.facebook.react.common.LifecycleState;
+public class MainActivity extends ReactActivity{
 
   /**
    * Returns the name of the main component registered from JavaScript. This is used to schedule
@@ -37,4 +41,24 @@ public class MainActivity extends ReactActivity {
       return reactRootView;
     }
   }
+
+  // @Override
+  // protected void onCreate(Bundle savedInstanceState) {
+  //   super.onCreate(savedInstanceState);
+  //   ReactRootView reactRootView = new ReactRootView(this);
+
+  //   ReactInstanceManager reactInstanceManager = ReactInstanceManager.builder()
+  //     .setApplication(getApplication())
+  //     .setBundleAssetName("index.android.bundle")
+  //     .setJSMainModulePath("index.android")
+  //     .addPackage(new MainReactPackage())
+  //     .addPackage(new RNFSPackage())      // <------- add package
+  //     .setUseDeveloperSupport(BuildConfig.DEBUG)
+  //     .setInitialLifecycleState(LifecycleState.RESUMED)
+  //     .build();
+
+  //   reactRootView.startReactApplication(reactInstanceManager, "ExampleRN", null);
+
+  //   setContentView(reactRootView);
+  // }
 }
