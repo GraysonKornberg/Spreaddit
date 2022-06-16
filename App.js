@@ -39,6 +39,7 @@ const App = () => {
   const [filePath, setFilePath] = useState({});
   const [nsfwToggle, setNsfwToggle] = useState(false);
   const [spoilerToggle, setSpoilerToggle] = useState(false);
+  const [thumbnailPath, setThumbnailPath] = useState('');
 
   //Select subreddit props
   const [subreddits, setSubreddits] = useState([]);
@@ -65,6 +66,8 @@ const App = () => {
               setPostType={setPostType}
               filePath={filePath}
               setFilePath={setFilePath}
+              thumbnailPath={thumbnailPath}
+              setThumbnailPath={setThumbnailPath}
               nsfwToggle={nsfwToggle}
               setNsfwToggle={setNsfwToggle}
               spoilerToggle={spoilerToggle}
@@ -119,6 +122,7 @@ const App = () => {
               subreddits={subreddits}
               postType={postType}
               accessToken={accessToken}
+              thumbnailPath={thumbnailPath}
             />
           )}
         </Stack.Screen>

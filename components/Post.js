@@ -30,6 +30,8 @@ const Post = ({
   setNsfwToggle,
   spoilerToggle,
   setSpoilerToggle,
+  thumbnailPath,
+  setThumbnailPath,
 }) => {
   const textPostSelected =
     postType == 'TextPost'
@@ -87,7 +89,12 @@ const Post = ({
         <ImagePost filePath={filePath} setFilePath={setFilePath} />
       )}
       {postType == 'VideoPost' && (
-        <VideoPost filePath={filePath} setFilePath={setFilePath} />
+        <VideoPost
+          filePath={filePath}
+          setFilePath={setFilePath}
+          thumbnailPath={thumbnailPath}
+          setThumbnailPath={setThumbnailPath}
+        />
       )}
       {postType == 'LinkPost' && <LinkPost setLink={setLink} link={link} />}
       <View
