@@ -33,14 +33,17 @@ const Uploading = ({
       );
       const makePostRequest = () => {
         let formdata = new FormData();
-        formdata.append('title', 'test12312');
-        console.log(imageURL);
+        formdata.append('title', subreddit.title);
         formdata.append('url', imageURL);
-        formdata.append('sr', 'test');
+        formdata.append('sr', subreddit.name);
+        formdata.append('nsfw', subreddit.nsfw);
+        formdata.append('spoiler', subreddit.spoiler);
+        formdata.append('flair_id', subreddit.selectedFlair);
         formdata.append('kind', 'image');
         formdata.append('api_type', 'json');
         formdata.append('resubmit', 'true');
         formdata.append('send_replies', 'true');
+        formdata.append('validate_on_submit', 'false');
         fetch('https://oauth.reddit.com/api/submit', {
           method: 'POST',
           headers: {
@@ -55,19 +58,18 @@ const Uploading = ({
             return;
           }
           res.json().then(data => {
-            console.log(data);
             console.log('submitted');
           });
         });
       };
       setSocketURL(webSocketURL);
       setListen(true);
-      setTimeout(makePostRequest, 3000);
+      console.log(imageURL, webSocketURL);
+      makePostRequest();
     };
-    // subreddits.map(subreddit => {
-    //   uploadPost(subreddit);
-    // });
-    uploadPost(subreddits[0]);
+    subreddits.map(subreddit => {
+      uploadPost(subreddit);
+    });
   }, []);
   useEffect(() => {
     if (listen) {

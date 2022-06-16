@@ -15,9 +15,7 @@ const config = {
   redirectUrl: 'com.spreaddit://oauthredirect',
   clientId: secrets.client_id,
   clientSecret: '', // empty string - needed for iOS
-  scopes: [
-    'identity, submit, flair, edit, history, modconfig, modflair, modlog, modposts, modwiki, mysubreddits, privatemessages, read, report, save, subscribe, vote, wikiedit, wikiread',
-  ],
+  scopes: ['identity, submit, flair,'],
   serviceConfiguration: {
     authorizationEndpoint: 'https://old.reddit.com/api/v1/authorize.compact',
     tokenEndpoint: 'https://www.reddit.com/api/v1/access_token',
