@@ -74,7 +74,6 @@ const VideoPost = ({
 const styles = StyleSheet.create({
   container: {
     padding: 10,
-    backgroundColor: '#fff',
     alignItems: 'center',
   },
   textStyle: {

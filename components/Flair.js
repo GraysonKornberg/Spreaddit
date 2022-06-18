@@ -81,13 +81,25 @@ const Flair = ({flairList, subreddit, subreddits, setSubreddits}) => {
                               />
                             )}
                             {flairComponent.e == 'text' && (
-                              <Text>{flairComponent.t}</Text>
+                              <Text
+                                style={
+                                  subreddit.selectedFlair == flair.id &&
+                                  styles.textSelected
+                                }>
+                                {flairComponent.t}
+                              </Text>
                             )}
                           </View>
                         );
                       })
                     ) : (
-                      <Text>{flair.text}</Text>
+                      <Text
+                        style={
+                          subreddit.selectedFlair == flair.id &&
+                          styles.textSelected
+                        }>
+                        {flair.text}
+                      </Text>
                     )}
                   </TouchableOpacity>
                 </View>
@@ -112,6 +124,10 @@ const styles = StyleSheet.create({
     padding: 10,
     flexDirection: 'row',
     alignItems: 'center',
+  },
+  textSelected: {
+    fontWeight: 'bold',
+    color: 'black',
   },
   noFlairsTextButton: {
     borderRadius: 25,
@@ -144,19 +160,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'red',
+    borderWidth: 1,
   },
   scrollView: {
     flexDirection: 'column',
+    width: 200,
   },
   flairContainer: {
     marginTop: 2,
     width: 200,
-    height: 100,
+    minHeight: 0,
+    maxHeight: 100,
     alignItems: 'center',
-    backgroundColor: 'lightgrey',
-    borderRadius: 20,
+    borderWidth: 1,
     alignSelf: 'center',
   },
   mapped: {alignItems: 'center', justifyContent: 'center'},

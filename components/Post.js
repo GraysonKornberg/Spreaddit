@@ -206,6 +206,11 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     marginLeft: 25,
     marginRight: 25,
+    alignItems: 'center',
+    backgroundColor: '#cee3f8',
+    padding: 25,
+    borderRadius: 10,
+    marginBottom: 30,
   },
 });
 

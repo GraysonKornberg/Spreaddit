@@ -13,9 +13,9 @@ import Uploading from './components/Uploading';
 const Stack = createNativeStackNavigator();
 
 const linking = {
-  prefixes: ['multiposter://'],
+  prefixes: ['spreaddit://'],
   config: {
-    initialRouteName: 'Multiposter',
+    initialRouteName: 'Spreaddit',
     screens: {
       Multiposter: {
         path: 'home',
@@ -30,6 +30,7 @@ const linking = {
 const App = () => {
   const [isSignedIn, setIsSignedIn] = useState(false);
   const [accessToken, setAccessToken] = useState('');
+  const [username, setUsername] = useState('');
 
   //Create post props
   const [title, setTitle] = useState('');
@@ -48,8 +49,16 @@ const App = () => {
   return isSignedIn ? (
     <NavigationContainer linking={linking}>
       <Stack.Navigator>
-        <Stack.Screen name="Multiposter">
-          {props => <HomeScreen {...props} accessToken={accessToken} />}
+        <Stack.Screen name="Spreaddit">
+          {props => (
+            <HomeScreen
+              {...props}
+              accessToken={accessToken}
+              username={username}
+              setUsername={setUsername}
+              setIsSignedIn={setIsSignedIn}
+            />
+          )}
         </Stack.Screen>
         <Stack.Screen name="Create Post">
           {props => (
@@ -122,7 +131,17 @@ const App = () => {
               subreddits={subreddits}
               postType={postType}
               accessToken={accessToken}
+              setSubreddits={setSubreddits}
               thumbnailPath={thumbnailPath}
+              setTitle={setTitle}
+              setText={setText}
+              setLink={setLink}
+              setPostType={setPostType}
+              setSubredditSearch={setSubredditSearch}
+              setFilePath={setFilePath}
+              setNsfwToggle={setNsfwToggle}
+              setSpoilerToggle={setSpoilerToggle}
+              setThumbnailPath={setThumbnailPath}
             />
           )}
         </Stack.Screen>

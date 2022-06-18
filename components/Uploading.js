@@ -9,6 +9,7 @@ import {
   Image,
 } from 'react-native';
 import RedditImageUploader from 'reddit-api-image-upload';
+import Snackbar from 'react-native-snackbar';
 
 const Uploading = ({
   navigation,
@@ -17,10 +18,21 @@ const Uploading = ({
   postType,
   filePath,
   thumbnailPath,
+  setSubreddits,
+  setTitle,
+  setLink,
+  setText,
+  setFilePath,
+  setThumbnailPath,
+  setNsfwToggle,
+  setSpoilerToggle,
+  setPostType,
+  setSubredditSearch,
 }) => {
+  const [error, setError] = useState(false);
+  const [complete, setComplete] = useState(false);
+  const [successCount, setSuccessCount] = useState(subreddits.length);
   const [websocket, setWebsocket] = useState();
-  const [listen, setListen] = useState(false);
-  const [socketURL, setSocketURL] = useState('');
   const redditImageUploader = new RedditImageUploader({
     token: accessToken,
     userAgent: 'multiposter:v1.0.0 by grayson',
@@ -30,7 +42,7 @@ const Uploading = ({
       const {imageURL, webSocketURL} = await redditImageUploader.uploadMedia(
         filePath.uri,
       );
-      const makePostRequest = () => {
+      const makePostRequest = async () => {
         let formdata = new FormData();
         formdata.append('title', subreddit.title);
         formdata.append('url', imageURL);
@@ -43,7 +55,7 @@ const Uploading = ({
         formdata.append('resubmit', 'true');
         formdata.append('send_replies', 'true');
         formdata.append('validate_on_submit', 'false');
-        fetch('https://oauth.reddit.com/api/submit', {
+        return fetch('https://oauth.reddit.com/api/submit', {
           method: 'POST',
           headers: {
             Authorization: `bearer ${accessToken}`,
@@ -53,6 +65,7 @@ const Uploading = ({
           body: formdata,
         }).then(res => {
           if (res.status != 200) {
+            setError(true);
             console.log('ERROR');
             return;
           }
@@ -61,21 +74,22 @@ const Uploading = ({
           });
         });
       };
-      setSocketURL(webSocketURL);
       setWebsocket(new WebSocket(webSocketURL));
-      makePostRequest();
+      await makePostRequest();
     };
     const UploadVideo = async subreddit => {
-      let type = 'video';
-      let {imageURL, webSocketURL} = await redditImageUploader.uploadMedia(
+      let videoReturn = await redditImageUploader.uploadMedia(
         filePath,
-        type,
+        'video',
       );
-      let videoURL = imageURL;
-      type = 'image';
-      imageURL = await redditImageUploader.uploadMedia(thumbnailPath, type);
+      let videoURL = videoReturn.imageURL;
+      let webSocketURL = videoReturn.webSocketURL;
+      let imageURL = await redditImageUploader.uploadMedia(
+        thumbnailPath,
+        'image',
+      );
       imageURL = imageURL.imageURL;
-      const makePostRequest = () => {
+      const makePostRequest = async () => {
         let formdata = new FormData();
         formdata.append('title', subreddit.title);
         formdata.append('url', videoURL);
@@ -89,7 +103,7 @@ const Uploading = ({
         formdata.append('resubmit', 'true');
         formdata.append('send_replies', 'true');
         formdata.append('validate_on_submit', 'false');
-        fetch('https://oauth.reddit.com/api/submit', {
+        return fetch('https://oauth.reddit.com/api/submit', {
           method: 'POST',
           headers: {
             Authorization: `bearer ${accessToken}`,
@@ -99,21 +113,20 @@ const Uploading = ({
           body: formdata,
         }).then(res => {
           if (res.status != 200) {
+            setError(true);
             console.log('ERROR');
             return;
           }
           res.json().then(data => {
-            console.log(data.json);
             console.log('submitted');
           });
         });
       };
-      setSocketURL(webSocketURL);
       setWebsocket(new WebSocket(webSocketURL));
-      makePostRequest();
+      await makePostRequest();
     };
     const UploadText = async subreddit => {
-      const makePostRequest = () => {
+      const makePostRequest = async () => {
         let formdata = new FormData();
         formdata.append('title', subreddit.title);
         formdata.append('sr', subreddit.name);
@@ -128,7 +141,7 @@ const Uploading = ({
         if (subreddit.text.length > 0) {
           formdata.append('text', subreddit.text);
         }
-        fetch('https://oauth.reddit.com/api/submit', {
+        return fetch('https://oauth.reddit.com/api/submit', {
           method: 'POST',
           headers: {
             Authorization: `bearer ${accessToken}`,
@@ -138,18 +151,22 @@ const Uploading = ({
           body: formdata,
         }).then(res => {
           if (res.status != 200) {
+            setError(true);
             console.log('ERROR');
             return;
           }
           res.json().then(data => {
+            if (data.json.errors.length != 0) {
+              setError(true);
+            }
             console.log('submitted');
           });
         });
       };
-      makePostRequest();
+      await makePostRequest();
     };
     const UploadLink = async subreddit => {
-      const makePostRequest = () => {
+      const makePostRequest = async () => {
         let formdata = new FormData();
         formdata.append('title', subreddit.title);
         formdata.append('sr', subreddit.name);
@@ -162,7 +179,7 @@ const Uploading = ({
         formdata.append('resubmit', 'true');
         formdata.append('send_replies', 'true');
         formdata.append('validate_on_submit', 'false');
-        fetch('https://oauth.reddit.com/api/submit', {
+        return fetch('https://oauth.reddit.com/api/submit', {
           method: 'POST',
           headers: {
             Authorization: `bearer ${accessToken}`,
@@ -172,44 +189,105 @@ const Uploading = ({
           body: formdata,
         }).then(res => {
           if (res.status != 200) {
+            setError(true);
             console.log('ERROR');
             return;
           }
           res.json().then(data => {
+            if (data.json.errors.length != 0) {
+              setError(true);
+            }
             console.log('submitted');
           });
         });
       };
-      makePostRequest();
+      await makePostRequest();
     };
-    if (postType == 'ImagePost') {
-      subreddits.map(subreddit => {
-        UploadImage(subreddit);
-      });
-    } else if (postType == 'TextPost') {
-      subreddits.map(subreddit => {
-        UploadText(subreddit);
-      });
-    } else if (postType == 'LinkPost') {
-      subreddits.map(subreddit => {
-        UploadLink(subreddit);
-      });
-    } else if (postType == 'VideoPost') {
-      subreddits.map(subreddit => {
-        UploadVideo(subreddit);
-      });
-    }
+    const mapLoop = async () => {
+      if (postType == 'ImagePost') {
+        const promises = await subreddits.map(async subreddit => {
+          await UploadImage(subreddit);
+        });
+        await Promise.all(promises).then(() => {
+          console.log('done');
+          setComplete(true);
+        });
+      } else if (postType == 'TextPost') {
+        const promises = await subreddits.map(async subreddit => {
+          await UploadText(subreddit);
+        });
+        await Promise.all(promises).then(() => {
+          console.log('done');
+          setComplete(true);
+        });
+      } else if (postType == 'LinkPost') {
+        const promises = await subreddits.map(async subreddit => {
+          await UploadLink(subreddit);
+        });
+        await Promise.all(promises).then(() => {
+          console.log('done');
+          setComplete(true);
+        });
+      } else if (postType == 'VideoPost') {
+        const promises = await subreddits.map(async subreddit => {
+          await UploadVideo(subreddit);
+        });
+        await Promise.all(promises).then(() => {
+          console.log('done');
+          setComplete(true);
+        });
+      }
+    };
+    mapLoop();
   }, []);
   useEffect(() => {
     if (websocket) {
       websocket.onmessage = e => {
-        console.log('Message received: ' + e.data);
+        console.log(e.data);
+        if (JSON.parse(e.data).type != 'success') {
+          setError(true);
+        }
       };
     }
   }, [websocket]);
+  useEffect(() => {
+    if (complete) {
+      Snackbar.show({
+        text: 'Submissions Complete',
+        duration: Snackbar.LENGTH_LONG,
+      });
+    }
+  }, [complete]);
+  useEffect(() => {
+    if (error) {
+      Snackbar.show({
+        text: "There was an error submitting at least one of your posts. Make sure you follow all of the subreddits' rules",
+        duration: Snackbar.LENGTH_LONG,
+      });
+    }
+  }, [error]);
+  const StartOver = () => {
+    setTitle('');
+    setPostType('TextPost');
+    setText('');
+    setLink('');
+    setFilePath({});
+    setNsfwToggle(false);
+    setSpoilerToggle(false);
+    setThumbnailPath('');
+    setSubreddits([]);
+    setSubredditSearch('');
+    navigation.navigate('Create Post');
+  };
   return (
     <View>
-      <Text>Uploading...</Text>
+      {complete ? (
+        <TouchableOpacity onPress={() => StartOver()}>
+          <Text>Home</Text>
+        </TouchableOpacity>
+      ) : (
+        <Text>Uploading...</Text>
+      )}
     </View>
   );
 };

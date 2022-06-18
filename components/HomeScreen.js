@@ -1,33 +1,75 @@
-import React from 'react';
+import React, {useState, useEffect} from 'react';
 import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
+import Loading from './Loading';
 
-const HomeScreen = ({navigation}) => {
-  return (
-    <View>
-      <Text>
-        Multiposter is a tool that allows you to create a single post and post
-        it to as many subreddits as you want. Subreddits have their own rules
-        for what kind of posts they allow, so if you would like to adjust the
-        contents for a particular subreddit, this app has the ability to do
-        that.
+const HomeScreen = ({
+  navigation,
+  accessToken,
+  setUsername,
+  username,
+  setIsSignedIn,
+}) => {
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    fetch(`https://oauth.reddit.com/api/me.json`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Authorization: `bearer ${accessToken}`,
+      },
+    }).then(res => {
+      if (res.status != 200) {
+        console.log('ERROR');
+        return;
+      }
+      res.json().then(data => {
+        setUsername(data.data.subreddit.display_name_prefixed);
+        setLoading(false);
+      });
+    });
+  }, []);
+  return loading ? (
+    <Loading />
+  ) : (
+    <View style={styles.container}>
+      <Text style={{fontSize: 40, fontWeight: 'bold', color: 'black', flex: 1}}>
+        Hello {username}
       </Text>
-      <Text>1. Create post</Text>
-      <Text>2. Choose subreddits</Text>
-      <Text>
-        3. Edit flairs/adjust the post for individual subreddits if needed
-      </Text>
-      <Text>4. Submit</Text>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.push('Create Post')}>
-        <Text>Create Post</Text>
-      </TouchableOpacity>
+      <View style={{flex: 3, justifyContent: 'flex-start'}}>
+        <TouchableOpacity
+          style={styles.button1}
+          onPress={() => navigation.push('Create Post')}>
+          <Text style={{color: 'black', fontSize: 20, fontWeight: 'bold'}}>
+            Create Post
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button2}
+          onPress={() => setIsSignedIn(false)}>
+          <Text style={{color: 'black', fontSize: 17, fontWeight: 'bold'}}>
+            Sign Out
+          </Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  button: {
+  container: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    flex: 1,
+    marginTop: 40,
+  },
+  button1: {
+    alignItems: 'center',
+    backgroundColor: '#cee3f8',
+    padding: 25,
+    borderRadius: 10,
+    marginBottom: 30,
+  },
+  button2: {
     alignItems: 'center',
     backgroundColor: '#cee3f8',
     padding: 25,

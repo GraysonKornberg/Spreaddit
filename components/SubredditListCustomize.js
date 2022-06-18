@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import Flair from './Flair';
+import Snackbar from 'react-native-snackbar';
 
 const SubredditListCustomize = ({
   navigation,
@@ -88,11 +89,35 @@ const SubredditListCustomize = ({
       setFlairAfterLoading(true);
     }
   }, [isLoading]);
+  const Upload = () => {
+    let valid = true;
+    let invalidSubs = [];
+    subreddits.map(sub => {
+      if (sub.needFlair && sub.selectedFlair == '') {
+        valid = false;
+        invalidSubs.push(sub.name);
+      }
+    });
+    if (valid) {
+      navigation.navigate('Uploading');
+    } else {
+      let text = invalidSubs[0];
+      invalidSubs.map(invalidSub => {
+        if (invalidSub != text) {
+          text = text + `, ${invalidSub}`;
+        }
+      });
+      Snackbar.show({
+        text: `The following subreddits require flairs: ${text}`,
+        duration: Snackbar.LENGTH_LONG,
+      });
+    }
+  };
   function renderFlair() {
     if (flairAfterLoading) {
       return (
-        <View style={{borderBottomWidth: 2}}>
-          <ScrollView nestedScrollEnabled={true}>
+        <View>
+          <ScrollView style={{borderBottomWidth: 2}} nestedScrollEnabled={true}>
             {subreddits.map((subreddit, index) => (
               <View
                 key={index}
@@ -126,7 +151,7 @@ const SubredditListCustomize = ({
               </View>
             ))}
           </ScrollView>
-          <TouchableOpacity onPress={() => navigation.navigate('Uploading')}>
+          <TouchableOpacity onPress={() => Upload()}>
             <Text>Upload</Text>
           </TouchableOpacity>
         </View>

@@ -8,6 +8,7 @@ import {
   ScrollView,
 } from 'react-native';
 import SubredditListTemp from './SubredditListTemp';
+import Snackbar from 'react-native-snackbar';
 
 const SubredditSelect = ({
   navigation,
@@ -188,12 +189,18 @@ const SubredditSelect = ({
           />
         </ScrollView>
       </View>
-      <TouchableOpacity style={styles.nextButton}>
-        <Text
-          style={styles.nextButtonText}
-          onPress={() => navigation.push('Flairs and Customization')}>
-          Flairs and Customization
-        </Text>
+      <TouchableOpacity
+        style={styles.nextButton}
+        onPress={() => {
+          if (subreddits.length != 0)
+            navigation.push('Flairs and Customization');
+          else
+            Snackbar.show({
+              text: 'Must add at least one subreddit',
+              duration: Snackbar.LENGTH_LONG,
+            });
+        }}>
+        <Text style={styles.nextButtonText}>Flairs and Customization</Text>
       </TouchableOpacity>
     </View>
   );
@@ -249,6 +256,8 @@ const styles = StyleSheet.create({
     marginLeft: 25,
     marginRight: 25,
     marginBottom: 15,
+    backgroundColor: '#cee3f8',
+    borderRadius: 10,
   },
 });
 
