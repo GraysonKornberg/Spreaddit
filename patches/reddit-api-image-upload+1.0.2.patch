@@ -1,0 +1,124 @@
+diff --git a/node_modules/reddit-api-image-upload/index.js b/node_modules/reddit-api-image-upload/index.js
+index 33499ca..0ac1a0d 100644
+--- a/node_modules/reddit-api-image-upload/index.js
++++ b/node_modules/reddit-api-image-upload/index.js
+@@ -1,10 +1,10 @@
+-import fs from 'fs/promises'
+-import fetch from 'node-fetch'
++var fs = require('react-native-fs')
+ import FormData from 'form-data'
+-import path from 'path'
++import path from 'react-native-path'
+ import _ from 'lodash'
+ import generateBasicAuth from 'basic-authorization-header'
+ import { XMLParser } from 'fast-xml-parser'
++import RNFetchBlob from 'rn-fetch-blob'
+ 
+ const TOKEN_NEEDS_TO_BE_OBTAINED = null
+ 
+@@ -36,11 +36,11 @@ export default class RedditImageUploader {
+     this.credentials = credentials
+   }
+ 
+-  async uploadMedia(pathToFile) {
++  async uploadMedia(pathToFile,type) {
+     if (this.token === TOKEN_NEEDS_TO_BE_OBTAINED) {
+       this.token = await loginWithPassword(this.credentials)
+     }
+-    return await uploadMediaFile(pathToFile, this.token, this.credentials.userAgent)
++    return await uploadMediaFile(pathToFile, this.token, this.credentials.userAgent, type)
+   }
+ }
+ // TODO: move everything to class body when private methods implemented in Node
+@@ -69,23 +69,27 @@ async function loginWithPassword(credentials) {
+   }
+ }
+ 
+-async function uploadMediaFile(mediafile, token, userAgent) {
++async function uploadMediaFile(mediafile, token, userAgent, type) {
+   let file, mimetype, filename
+ 
+   if (typeof mediafile === 'string') {
+-    file = await fs.readFile(mediafile)
++    // file = await fs.readFile(mediafile, 'base64')
+     filename = path.basename(mediafile)
+-    mimetype = guessMimeType(filename)
++    if (type == 'image'){
++      mimetype='image/jpeg'
++    }else if (type == 'video') {
++      mimetype='video/mp4'
++    } else {
++      mimetype = guessMimeType(filename)
++    }
+   //} else if (file instanceof Buffer) {
+     //mimetype = use mmmagic module?
+     //filename = 'placeholder. what? extension based on guessed mimetype?
+   } else {
+     throw 'You must use string as path to the file to upload it to Reddit.'
+   }
+-
+   const { uploadURL, fields, listenWSUrl } = await obtainUploadURL(filename, mimetype, token, userAgent)
+-
+-  const imageURL = await uploadToAWS(uploadURL, fields, file, filename)
++  const imageURL = await uploadToAWS(uploadURL, fields, mediafile, filename, mimetype)
+   return { imageURL, webSocketURL: listenWSUrl }
+ }
+ 
+@@ -129,26 +133,39 @@ async function obtainUploadURL(filename, mimetype, token, userAgent) {
+   }
+ }
+ 
+-async function uploadToAWS(uploadURL, fields, buffer, filename) {
+-  const bodyForm = new FormData()
+-  fields.forEach(field => bodyForm.append(...Object.values(field)))
+-  bodyForm.append('file', buffer, filename)
+-
+-  const responseRaw = await fetch(uploadURL, {
+-    method: 'POST',
+-    body: bodyForm
+-  })
+-  const response = await responseRaw.text()
+-
+-  try {
++async function uploadToAWS(uploadURL, fields, filePath, filename,mimetype) {
++  let bodyForm = [];
++  let imageURL = '';
++  let extension = path.extname(filename);
++  if (extension == '') {
++    if (mimetype == "video/mp4") {
++      extension = '.mp4'
++    }
++    else if (mimetype == "image/jpeg") {
++      extension='.jpg'
++    }
++  }
++  fields.forEach(field => bodyForm=[...bodyForm, {name:field["name"], data:field["value"]}])
++  bodyForm = [...bodyForm, {name: 'file',
++  filename: `${filename}${extension}`,
++  data: RNFetchBlob.wrap(filePath)}]
++  let responseRaw = await RNFetchBlob.fetch(
++    "POST",
++    uploadURL, {
++      "Content-Type":"multipart/form-data"
++    },
++   bodyForm,
++    ).then((resp => {
++    try {
+     const parser = new XMLParser()
+-    const xml = parser.parse(response)
++    const xml = parser.parse(resp.data)
+     const encodedURL = xml.PostResponse.Location
+     if (!encodedURL) throw 'No URL returned'
+-    const imageURL = decodeURIComponent(encodedURL)
+-    return imageURL
++    imageURL = decodeURIComponent(encodedURL)
+   } catch(e) {
+-    console.error('CDN Response:', response)
++    console.error('CDN Response:', resp)
+     throw e
+-  }
++  }}
++  ));
++  return imageURL
+ }
+\ No newline at end of file
