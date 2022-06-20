@@ -1,13 +1,6 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {authorize} from 'react-native-app-auth';
-import {
-  View,
-  Text,
-  Button,
-  Alert,
-  StyleSheet,
-  TouchableOpacity,
-} from 'react-native';
+import {View, Text, Alert, StyleSheet, TouchableOpacity} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import secrets from '../secrets';
 

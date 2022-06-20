@@ -7,6 +7,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
+  Platform,
 } from 'react-native';
 import RedditImageUploader from 'reddit-api-image-upload';
 import Snackbar from 'react-native-snackbar';
@@ -41,6 +42,8 @@ const Uploading = ({
     const UploadImage = async subreddit => {
       const {imageURL, webSocketURL} = await redditImageUploader.uploadMedia(
         filePath.uri,
+        'image',
+        Platform.OS,
       );
       const makePostRequest = async () => {
         let formdata = new FormData();
@@ -81,12 +84,14 @@ const Uploading = ({
       let videoReturn = await redditImageUploader.uploadMedia(
         filePath,
         'video',
+        Platform.OS,
       );
       let videoURL = videoReturn.imageURL;
       let webSocketURL = videoReturn.webSocketURL;
       let imageURL = await redditImageUploader.uploadMedia(
         thumbnailPath,
         'image',
+        Platform.OS,
       );
       imageURL = imageURL.imageURL;
       const makePostRequest = async () => {

@@ -6,6 +6,8 @@ import {
   StyleSheet,
   TextInput,
   ScrollView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
 import SubredditListTemp from './SubredditListTemp';
 import Snackbar from 'react-native-snackbar';
@@ -159,50 +161,52 @@ const SubredditSelect = ({
     });
   };
   return (
-    <View style={styles.container}>
-      <View style={styles.input}>
-        <TextInput
-          placeholder={'Subreddit'}
-          value={subredditSearch}
-          onChangeText={setSubredditSearch}
-          style={styles.inputText}
-          multiline={false}
-        />
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.container}>
+        <View style={styles.input}>
+          <TextInput
+            placeholder={'Subreddit'}
+            value={subredditSearch}
+            onChangeText={setSubredditSearch}
+            style={styles.inputText}
+            multiline={false}
+          />
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => {
+              if (subredditSearch) {
+                AddSubreddit(subredditSearch);
+              } else {
+                alert('Field cannot be left blank');
+              }
+            }}>
+            <Text style={styles.addButtonText}>Add</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.scrollViewContainer}>
+          <ScrollView style={styles.scrollView}>
+            <SubredditListTemp
+              style={styles.subredditsContainer}
+              subreddits={subreddits}
+              setSubreddits={setSubreddits}
+            />
+          </ScrollView>
+        </View>
         <TouchableOpacity
-          style={styles.addButton}
+          style={styles.nextButton}
           onPress={() => {
-            if (subredditSearch) {
-              AddSubreddit(subredditSearch);
-            } else {
-              alert('Field cannot be left blank');
-            }
+            if (subreddits.length != 0)
+              navigation.push('Flairs and Customization');
+            else
+              Snackbar.show({
+                text: 'Must add at least one subreddit',
+                duration: Snackbar.LENGTH_LONG,
+              });
           }}>
-          <Text style={styles.addButtonText}>Add</Text>
+          <Text style={styles.nextButtonText}>Flairs and Customization</Text>
         </TouchableOpacity>
       </View>
-      <View style={styles.scrollViewContainer}>
-        <ScrollView style={styles.scrollView}>
-          <SubredditListTemp
-            style={styles.subredditsContainer}
-            subreddits={subreddits}
-            setSubreddits={setSubreddits}
-          />
-        </ScrollView>
-      </View>
-      <TouchableOpacity
-        style={styles.nextButton}
-        onPress={() => {
-          if (subreddits.length != 0)
-            navigation.push('Flairs and Customization');
-          else
-            Snackbar.show({
-              text: 'Must add at least one subreddit',
-              duration: Snackbar.LENGTH_LONG,
-            });
-        }}>
-        <Text style={styles.nextButtonText}>Flairs and Customization</Text>
-      </TouchableOpacity>
-    </View>
+    </TouchableWithoutFeedback>
   );
 };
 

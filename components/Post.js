@@ -1,11 +1,13 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {
   View,
   Text,
-  Button,
   TextInput,
   StyleSheet,
   TouchableOpacity,
+  Platform,
+  Keyboard,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
 import TextPost from './TextPost';
@@ -50,105 +52,115 @@ const Post = ({
       ? styles.postTypeButtonSelected
       : styles.postTypeButton;
   return (
-    <View style={styles.container}>
-      <View style={styles.postTypeContainer}>
-        <TouchableOpacity
-          style={textPostSelected}
-          onPress={() => setPostType('TextPost')}>
-          <Text style={styles.postTypeText}>Text</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={imagePostSelected}
-          onPress={() => setPostType('ImagePost')}>
-          <Text style={styles.postTypeText}>Image</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={videoPostSelected}
-          onPress={() => setPostType('VideoPost')}>
-          <Text style={styles.postTypeText}>Video</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={linkPostSelected}
-          onPress={() => setPostType('LinkPost')}>
-          <Text style={styles.postTypeText}>Link</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.input}>
-        <TextInput
-          placeholder={'Title'}
-          style={styles.inputText}
-          onChangeText={setTitle}
-          value={title}
-          multiline={true}
-          maxLength={300}
-        />
-        <Text style={styles.charCount}>{title.length}/300</Text>
-      </View>
-      {postType == 'TextPost' && <TextPost setText={setText} text={text} />}
-      {postType == 'ImagePost' && (
-        <ImagePost filePath={filePath} setFilePath={setFilePath} />
-      )}
-      {postType == 'VideoPost' && (
-        <VideoPost
-          filePath={filePath}
-          setFilePath={setFilePath}
-          thumbnailPath={thumbnailPath}
-          setThumbnailPath={setThumbnailPath}
-        />
-      )}
-      {postType == 'LinkPost' && <LinkPost setLink={setLink} link={link} />}
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'center',
-          margin: 20,
-        }}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.container}>
+        <View style={styles.postTypeContainer}>
+          <TouchableOpacity
+            style={textPostSelected}
+            onPress={() => setPostType('TextPost')}>
+            <Text style={styles.postTypeText}>Text</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={imagePostSelected}
+            onPress={() => setPostType('ImagePost')}>
+            <Text style={styles.postTypeText}>Image</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={videoPostSelected}
+            onPress={() => setPostType('VideoPost')}>
+            <Text style={styles.postTypeText}>Video</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={linkPostSelected}
+            onPress={() => setPostType('LinkPost')}>
+            <Text style={styles.postTypeText}>Link</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.input}>
+          <TextInput
+            placeholder={'Title'}
+            style={styles.inputText}
+            onChangeText={setTitle}
+            value={title}
+            multiline={true}
+            maxLength={300}
+          />
+          <Text style={styles.charCount}>{title.length}/300</Text>
+        </View>
+        {postType == 'TextPost' && <TextPost setText={setText} text={text} />}
+        {postType == 'ImagePost' && (
+          <ImagePost filePath={filePath} setFilePath={setFilePath} />
+        )}
+        {postType == 'VideoPost' && (
+          <VideoPost
+            filePath={filePath}
+            setFilePath={setFilePath}
+            thumbnailPath={thumbnailPath}
+            setThumbnailPath={setThumbnailPath}
+          />
+        )}
+        {postType == 'LinkPost' && <LinkPost setLink={setLink} link={link} />}
         <View
           style={{
             flexDirection: 'row',
             justifyContent: 'center',
-            alignItems: 'center',
+            margin: 20,
           }}>
-          <Text style={{color: 'black', fontSize: 20}}>Spoiler: </Text>
-          <CheckBox
-            style={{transform: [{scaleX: 1.5}, {scaleY: 1.5}]}}
-            value={spoilerToggle}
-            onValueChange={() => setSpoilerToggle(!spoilerToggle)}
-          />
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            <Text style={{color: 'black', fontSize: 20}}>Spoiler: </Text>
+            <CheckBox
+              style={
+                Platform.OS != 'ios' && {
+                  transform: [{scaleX: 1.5}, {scaleY: 1.5}],
+                }
+              }
+              value={spoilerToggle}
+              onValueChange={() => setSpoilerToggle(!spoilerToggle)}
+            />
+          </View>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            <Text style={{color: 'black', fontSize: 20, paddingLeft: 20}}>
+              NSFW:{' '}
+            </Text>
+            <CheckBox
+              style={
+                Platform.OS != 'ios' && {
+                  transform: [{scaleX: 1.5}, {scaleY: 1.5}],
+                }
+              }
+              value={nsfwToggle}
+              onValueChange={() => setNsfwToggle(!nsfwToggle)}
+            />
+          </View>
         </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
+        <TouchableOpacity
+          style={styles.nextButton}
+          onPress={() => {
+            if (title.trim().length == 0) {
+              alert('Title cannot be left blank');
+            } else if (
+              (postType == 'ImagePost' || postType == 'VideoPost') &&
+              Object.keys(filePath).length == 0
+            ) {
+              alert('Must select media file');
+            } else if (postType == 'LinkPost' && link.length == 0) {
+              alert('URL cannot be left blank');
+            } else navigation.push('Select Subreddits');
           }}>
-          <Text style={{color: 'black', fontSize: 20, paddingLeft: 20}}>
-            NSFW:{' '}
-          </Text>
-          <CheckBox
-            style={{transform: [{scaleX: 1.5}, {scaleY: 1.5}]}}
-            value={nsfwToggle}
-            onValueChange={() => setNsfwToggle(!nsfwToggle)}
-          />
-        </View>
+          <Text style={styles.nextButtonText}>Select Subreddits</Text>
+        </TouchableOpacity>
       </View>
-      <TouchableOpacity
-        style={styles.nextButton}
-        onPress={() => {
-          if (title.trim().length == 0) {
-            alert('Title cannot be left blank');
-          } else if (
-            (postType == 'ImagePost' || postType == 'VideoPost') &&
-            Object.keys(filePath).length == 0
-          ) {
-            alert('Must select media file');
-          } else if (postType == 'LinkPost' && link.length == 0) {
-            alert('URL cannot be left blank');
-          } else navigation.push('Select Subreddits');
-        }}>
-        <Text style={styles.nextButtonText}>Select Subreddits</Text>
-      </TouchableOpacity>
-    </View>
+    </TouchableWithoutFeedback>
   );
 };
 

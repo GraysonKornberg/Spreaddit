@@ -5,8 +5,8 @@ import {
   TouchableOpacity,
   StyleSheet,
   TextInput,
-  ScrollView,
-  Image,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
 
@@ -38,87 +38,97 @@ const SubredditSettings = ({
     navigation.pop();
   };
   return (
-    <View>
-      <View style={styles.input}>
-        <TextInput
-          placeholder={'Title'}
-          style={styles.inputText}
-          value={currTitle}
-          onChangeText={setCurrTitle}
-          multiline={true}
-          maxLength={300}
-        />
-        <Text style={styles.charCount}>{currTitle.length}/300</Text>
-      </View>
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'center',
-          margin: 20,
-        }}>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}>
-          <Text style={{color: 'black', fontSize: 20}}>Spoiler: </Text>
-          <CheckBox
-            disabled={!subreddit.spoilerEnabled}
-            style={{transform: [{scaleX: 1.5}, {scaleY: 1.5}]}}
-            value={currSpoilerToggle}
-            onValueChange={() => setCurrSpoilerToggle(!currSpoilerToggle)}
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={{flex: 1}}>
+        <View style={styles.input}>
+          <TextInput
+            placeholder={'Title'}
+            style={styles.inputText}
+            value={currTitle}
+            onChangeText={setCurrTitle}
+            multiline={true}
+            maxLength={300}
           />
+          <Text style={styles.charCount}>{currTitle.length}/300</Text>
         </View>
         <View
           style={{
             flexDirection: 'row',
             justifyContent: 'center',
-            alignItems: 'center',
+            margin: 20,
           }}>
-          <Text style={{color: 'black', fontSize: 20, paddingLeft: 20}}>
-            NSFW:{' '}
-          </Text>
-          <CheckBox
-            style={{transform: [{scaleX: 1.5}, {scaleY: 1.5}]}}
-            value={currNsfwToggle}
-            onValueChange={() => setCurrNsfwToggle(!currNsfwToggle)}
-          />
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            <Text style={{color: 'black', fontSize: 20}}>Spoiler: </Text>
+            <CheckBox
+              disabled={!subreddit.spoilerEnabled}
+              style={
+                Platform.OS != 'ios' && {
+                  transform: [{scaleX: 1.5}, {scaleY: 1.5}],
+                }
+              }
+              value={currSpoilerToggle}
+              onValueChange={() => setCurrSpoilerToggle(!currSpoilerToggle)}
+            />
+          </View>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            <Text style={{color: 'black', fontSize: 20, paddingLeft: 20}}>
+              NSFW:{' '}
+            </Text>
+            <CheckBox
+              style={
+                Platform.OS != 'ios' && {
+                  transform: [{scaleX: 1.5}, {scaleY: 1.5}],
+                }
+              }
+              value={currNsfwToggle}
+              onValueChange={() => setCurrNsfwToggle(!currNsfwToggle)}
+            />
+          </View>
+        </View>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-around',
+            margin: 20,
+          }}>
+          <TouchableOpacity
+            style={{
+              borderWidth: 2,
+              width: 100,
+              height: 60,
+              justifyContent: 'center',
+            }}
+            onPress={() => navigation.pop()}>
+            <Text style={{textAlign: 'center', color: 'black', fontSize: 20}}>
+              Cancel
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              borderWidth: 2,
+              width: 100,
+              height: 60,
+              justifyContent: 'center',
+            }}
+            onPress={() => confirmChanges()}>
+            <Text style={{textAlign: 'center', color: 'black', fontSize: 20}}>
+              Confirm Changes
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
-      <View
-        style={{
-          flexDirection: 'row',
-          alignItems: 'center',
-          justifyContent: 'space-around',
-          margin: 20,
-        }}>
-        <TouchableOpacity
-          style={{
-            borderWidth: 2,
-            width: 100,
-            height: 60,
-            justifyContent: 'center',
-          }}
-          onPress={() => navigation.pop()}>
-          <Text style={{textAlign: 'center', color: 'black', fontSize: 20}}>
-            Cancel
-          </Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={{
-            borderWidth: 2,
-            width: 100,
-            height: 60,
-            justifyContent: 'center',
-          }}
-          onPress={() => confirmChanges()}>
-          <Text style={{textAlign: 'center', color: 'black', fontSize: 20}}>
-            Confirm Changes
-          </Text>
-        </TouchableOpacity>
-      </View>
-    </View>
+    </TouchableWithoutFeedback>
   );
 };
 

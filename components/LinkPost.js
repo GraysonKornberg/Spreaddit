@@ -1,17 +1,26 @@
 import React from 'react';
-import {View, Text, Button, TextInput, StyleSheet} from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  StyleSheet,
+  Keyboard,
+  TouchableWithoutFeedback,
+} from 'react-native';
 
 const LinkPost = ({link, setLink}) => {
   return (
-    <View style={styles.textContainer}>
-      <TextInput
-        placeholder={'Url'}
-        style={styles.text}
-        onChangeText={setLink}
-        value={link}
-        multiline={true}
-      />
-    </View>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      <View style={styles.textContainer}>
+        <TextInput
+          placeholder={'Url'}
+          style={styles.text}
+          onChangeText={setLink}
+          value={link}
+          multiline={true}
+        />
+      </View>
+    </TouchableWithoutFeedback>
   );
 };
 

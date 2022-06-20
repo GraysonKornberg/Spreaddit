@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, Button, TextInput, StyleSheet} from 'react-native';
+import {View, TextInput, StyleSheet} from 'react-native';
 
 const TextPost = ({setText, text}) => {
   return (

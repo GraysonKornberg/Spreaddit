@@ -1,5 +1,5 @@
 diff --git a/node_modules/reddit-api-image-upload/index.js b/node_modules/reddit-api-image-upload/index.js
-index 33499ca..0ac1a0d 100644
+index 33499ca..a856cd2 100644
 --- a/node_modules/reddit-api-image-upload/index.js
 +++ b/node_modules/reddit-api-image-upload/index.js
 @@ -1,10 +1,10 @@
@@ -21,12 +21,12 @@ index 33499ca..0ac1a0d 100644
    }
  
 -  async uploadMedia(pathToFile) {
-+  async uploadMedia(pathToFile,type) {
++  async uploadMedia(pathToFile,type,os) {
      if (this.token === TOKEN_NEEDS_TO_BE_OBTAINED) {
        this.token = await loginWithPassword(this.credentials)
      }
 -    return await uploadMediaFile(pathToFile, this.token, this.credentials.userAgent)
-+    return await uploadMediaFile(pathToFile, this.token, this.credentials.userAgent, type)
++    return await uploadMediaFile(pathToFile, this.token, this.credentials.userAgent, type,os)
    }
  }
  // TODO: move everything to class body when private methods implemented in Node
@@ -35,7 +35,7 @@ index 33499ca..0ac1a0d 100644
  }
  
 -async function uploadMediaFile(mediafile, token, userAgent) {
-+async function uploadMediaFile(mediafile, token, userAgent, type) {
++async function uploadMediaFile(mediafile, token, userAgent, type,os) {
    let file, mimetype, filename
  
    if (typeof mediafile === 'string') {
@@ -60,11 +60,11 @@ index 33499ca..0ac1a0d 100644
    const { uploadURL, fields, listenWSUrl } = await obtainUploadURL(filename, mimetype, token, userAgent)
 -
 -  const imageURL = await uploadToAWS(uploadURL, fields, file, filename)
-+  const imageURL = await uploadToAWS(uploadURL, fields, mediafile, filename, mimetype)
++  const imageURL = await uploadToAWS(uploadURL, fields, mediafile, filename, mimetype,os)
    return { imageURL, webSocketURL: listenWSUrl }
  }
  
-@@ -129,26 +133,39 @@ async function obtainUploadURL(filename, mimetype, token, userAgent) {
+@@ -129,26 +133,42 @@ async function obtainUploadURL(filename, mimetype, token, userAgent) {
    }
  }
  
@@ -80,17 +80,20 @@ index 33499ca..0ac1a0d 100644
 -  const response = await responseRaw.text()
 -
 -  try {
-+async function uploadToAWS(uploadURL, fields, filePath, filename,mimetype) {
++async function uploadToAWS(uploadURL, fields, filePath, filename,mimetype,os) {
 +  let bodyForm = [];
 +  let imageURL = '';
 +  let extension = path.extname(filename);
 +  if (extension == '') {
 +    if (mimetype == "video/mp4") {
-+      extension = '.mp4'
++      filename = `${filename}.mp4`
 +    }
 +    else if (mimetype == "image/jpeg") {
-+      extension='.jpg'
++      filename = `${filename}.mp4`
 +    }
++  }
++  if (os === 'ios') {
++    filePath = filePath.replace('file://','');
 +  }
 +  fields.forEach(field => bodyForm=[...bodyForm, {name:field["name"], data:field["value"]}])
 +  bodyForm = [...bodyForm, {name: 'file',

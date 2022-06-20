@@ -1,8 +1,7 @@
-import React, {useState} from 'react';
+import React from 'react';
 import {View, Text, TouchableOpacity, StyleSheet, Image} from 'react-native';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {createThumbnail} from 'react-native-create-thumbnail';
-import {stat} from 'react-native-fs';
 
 const VideoPost = ({
   filePath,
@@ -10,10 +9,6 @@ const VideoPost = ({
   thumbnailPath,
   setThumbnailPath,
 }) => {
-  // const getOriginalFilePath = async videoUri => {
-  //   const {originalFilepath} = await stat(videoUri);
-  //   setFilePath(`file://${originalFilepath}`);
-  // };
   const chooseFile = () => {
     let options = {
       title: 'Select Video',

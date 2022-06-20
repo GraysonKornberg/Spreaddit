@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  TextInput,
-  ScrollView,
-} from 'react-native';
+import {View} from 'react-native';
 import SubredditListCustomize from './SubredditListCustomize';
 
 const SubredditOptions = ({
@@ -26,7 +19,5 @@ const SubredditOptions = ({
     </View>
   );
 };
-
-const styles = StyleSheet.create({});
 
 export default SubredditOptions;
