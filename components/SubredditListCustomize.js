@@ -150,8 +150,8 @@ const SubredditListCustomize = ({
               </View>
             ))}
           </ScrollView>
-          <TouchableOpacity onPress={() => Upload()}>
-            <Text>Upload</Text>
+          <TouchableOpacity style={styles.button} onPress={() => Upload()}>
+            <Text style={{color: 'black', fontSize: 25}}>UPLOAD</Text>
           </TouchableOpacity>
         </View>
       );
@@ -163,6 +163,18 @@ const SubredditListCustomize = ({
 };
 
 const styles = StyleSheet.create({
+  button: {
+    alignItems: 'center',
+    marginTop: 10,
+    borderWidth: 2,
+    marginLeft: 25,
+    marginRight: 25,
+    marginBottom: 15,
+    backgroundColor: '#cee3f8',
+    borderRadius: 10,
+    alignSelf: 'center',
+    width: 200,
+  },
   flairs: {
     flex: 2,
     alignSelf: 'flex-end',

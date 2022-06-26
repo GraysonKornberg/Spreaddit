@@ -29,8 +29,10 @@ const linking = {
 
 const App = () => {
   const [isSignedIn, setIsSignedIn] = useState(false);
+  const [currAccountID, setCurrAccountID] = useState('');
   const [accessToken, setAccessToken] = useState('');
   const [username, setUsername] = useState('');
+  const [refreshToken, setRefreshToken] = useState('');
 
   //Create post props
   const [title, setTitle] = useState('');
@@ -53,10 +55,15 @@ const App = () => {
           {props => (
             <HomeScreen
               {...props}
+              setAccessToken={setAccessToken}
               accessToken={accessToken}
               username={username}
               setUsername={setUsername}
               setIsSignedIn={setIsSignedIn}
+              currAccountID={currAccountID}
+              setCurrAccountID={setCurrAccountID}
+              refreshToken={refreshToken}
+              setRefreshToken={setRefreshToken}
             />
           )}
         </Stack.Screen>
@@ -151,6 +158,7 @@ const App = () => {
     <LoginScreen
       setIsSignedIn={setIsSignedIn}
       setAccessToken={setAccessToken}
+      setCurrAccountID={setCurrAccountID}
     />
   );
 };

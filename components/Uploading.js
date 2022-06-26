@@ -2,7 +2,6 @@ import React, {useState, useEffect} from 'react';
 import {
   View,
   Text,
-  Button,
   TextInput,
   StyleSheet,
   TouchableOpacity,
@@ -256,10 +255,16 @@ const Uploading = ({
     }
   }, [websocket]);
   useEffect(() => {
-    if (complete) {
+    if (complete && !error) {
       Snackbar.show({
         text: 'Submissions Complete',
-        duration: Snackbar.LENGTH_LONG,
+        duration: Snackbar.LENGTH_INDEFINITE,
+        action: {
+          text: 'X',
+          onPress: () => {
+            Snackbar.dismiss();
+          },
+        },
       });
     }
   }, [complete]);
@@ -267,7 +272,14 @@ const Uploading = ({
     if (error) {
       Snackbar.show({
         text: "There was an error submitting at least one of your posts. Make sure you follow all of the subreddits' rules",
-        duration: Snackbar.LENGTH_LONG,
+        numberOfLines: 3,
+        duration: Snackbar.LENGTH_INDEFINITE,
+        action: {
+          text: 'X',
+          onPress: () => {
+            Snackbar.dismiss();
+          },
+        },
       });
     }
   }, [error]);
@@ -282,7 +294,7 @@ const Uploading = ({
     setThumbnailPath('');
     setSubreddits([]);
     setSubredditSearch('');
-    navigation.navigate('Create Post');
+    navigation.navigate('Spreaddit');
   };
   return (
     <View>
