@@ -1,13 +1,53 @@
 import React from 'react';
 import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import SQLite from 'react-native-sqlite-storage';
 
-const SubredditListTemp = ({subreddits, setSubreddits}) => {
-  const removeSubreddit = subredditRemove => {
-    let newSubreddits = subreddits.filter(subreddit => {
-      return subreddit != subredditRemove;
+const db = SQLite.openDatabase(
+  {
+    name: 'mainDB',
+    location: 'default',
+  },
+  () => {},
+  error => {
+    console.log(error);
+  },
+);
+
+const SubredditListTemp = ({subreddits, setSubreddits, CheckIfAllowed}) => {
+  const toggleSubreddit = async subredditToggle => {
+    let subredditCopy = subreddits.filter(sub => {
+      return sub.name == subredditToggle.name;
     });
-    setSubreddits(newSubreddits);
+    await db.transaction(async tx => {
+      await tx.executeSql(
+        `SELECT * FROM Subreddits WHERE subredditName='${subredditToggle.name}'`,
+        [],
+        async (tx, results) => {
+          let allowed = await CheckIfAllowed(results.rows.item(0));
+          console.log(allowed);
+          if (allowed) {
+            subredditCopy[0].selected = !subredditCopy[0].selected;
+            const index = subreddits.findIndex(
+              sub => sub.name == subredditToggle.name,
+            );
+            if (subredditCopy[0].selected) {
+              setSubreddits([
+                subredditCopy[0],
+                ...subreddits.slice(0, index),
+                ...subreddits.slice(index + 1),
+              ]);
+            } else {
+              setSubreddits([
+                ...subreddits.slice(0, index),
+                ...subreddits.slice(index + 1),
+                subredditCopy[0],
+              ]);
+            }
+          }
+        },
+      );
+    });
   };
   return (
     <View>
@@ -16,8 +56,12 @@ const SubredditListTemp = ({subreddits, setSubreddits}) => {
           <Text style={styles.text}>{subreddit.name}</Text>
           <TouchableOpacity
             style={styles.icon}
-            onPress={() => removeSubreddit(subreddit)}>
-            <Icon name="remove" color={'red'} size={40} />
+            onPress={() => toggleSubreddit(subreddit)}>
+            {subreddit.selected ? (
+              <Icon name="check-square" color={'black'} size={40} />
+            ) : (
+              <Icon name="square" color={'black'} size={40} />
+            )}
           </TouchableOpacity>
         </View>
       ))}

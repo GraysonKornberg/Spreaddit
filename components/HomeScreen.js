@@ -4,7 +4,7 @@ import Loading from './Loading';
 import SQLite from 'react-native-sqlite-storage';
 import Modal from 'react-native-modal';
 import AccountList from './AccountList';
-import {authorize} from 'react-native-app-auth';
+import {authorize, refresh} from 'react-native-app-auth';
 import secrets from '../secrets';
 
 const db = SQLite.openDatabase(
@@ -52,6 +52,16 @@ const HomeScreen = ({
   const [loading, setLoading] = useState(true);
   const [accountsPopup, setAccountsPopup] = useState(false);
   const [refreshAccount, setRefreshAccount] = useState(false);
+  const ClearUserTable = async () => {
+    await db.transaction(async tx => {
+      await tx.executeSql(`DELETE FROM Users`);
+    });
+  };
+  const ClearSubredditsTable = async () => {
+    await db.transaction(async tx => {
+      await tx.executeSql(`DELETE FROM Subreddits`);
+    });
+  };
   const AddAccount = async () => {
     try {
       const authState = await authorize(config);
@@ -112,16 +122,22 @@ const HomeScreen = ({
     setRefreshAccount(!refreshAccount);
   };
   const LoadAccount = async () => {
+    let _refreshToken = '';
     await db.transaction(async tx => {
       await tx.executeSql(
         `SELECT accountID, username, refreshToken, signedIn FROM Users WHERE signedIn=1`,
         [],
-        (tx, results) => {
+        async (tx, results) => {
           var len = results.rows.length;
           if (len > 0) {
+            _refreshToken = results.rows.item(0).refreshToken;
             setUsername(results.rows.item(0).username);
             setCurrAccountID(results.rows.item(0).accountID);
-            setRefreshToken(results.rows.item(0).refreshToken);
+            setRefreshToken(_refreshToken);
+            const result = await refresh(config, {
+              refreshToken: _refreshToken,
+            });
+            setAccessToken(result.accessToken);
             setLoading(false);
           } else {
             DebugData();
@@ -131,6 +147,8 @@ const HomeScreen = ({
     });
   };
   useEffect(() => {
+    // ClearUserTable();
+    // ClearSubredditsTable();
     if (loading) {
       LoadAccount();
     }

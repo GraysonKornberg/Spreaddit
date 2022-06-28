@@ -37,7 +37,7 @@ const config = {
 
 const LoginScreen = ({navigation, setIsSignedIn, setAccessToken}) => {
   useEffect(() => {
-    createTable();
+    CreateTable();
     db.transaction(tx => {
       tx.executeSql(`SELECT * FROM USERS`, [], (tx, results) => {
         if (results.rows.length > 0) {
@@ -78,7 +78,7 @@ const LoginScreen = ({navigation, setIsSignedIn, setAccessToken}) => {
       Alert.alert('Failed to log in', error.message);
     }
   };
-  const createTable = () => {
+  const CreateTable = () => {
     db.transaction(tx => {
       tx.executeSql(
         'CREATE TABLE IF NOT EXISTS ' +
