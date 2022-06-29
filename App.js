@@ -95,6 +95,7 @@ const App = () => {
           {props => (
             <SubredditSelect
               {...props}
+              currAccountID={currAccountID}
               setSubreddits={setSubreddits}
               subreddits={subreddits}
               accessToken={accessToken}

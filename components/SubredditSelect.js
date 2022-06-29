@@ -38,8 +38,10 @@ const SubredditSelect = ({
   filePath,
   nsfwToggle,
   spoilerToggle,
+  currAccountID,
+  setCurrAccountID,
 }) => {
-  const CreateTable = () => {
+  const CreateTables = () => {
     db.transaction(tx => {
       tx.executeSql(
         'CREATE TABLE IF NOT EXISTS ' +
@@ -47,9 +49,17 @@ const SubredditSelect = ({
           '(subredditID TEXT PRIMARY KEY, subredditName TEXT, submissionType TEXT, allowImages INTEGER, allowVideos INTEGER, bodyRestrictionPolicy TEXT, needFlair INTEGER, spoilersEnabled INTEGER);',
       );
     });
+    db.transaction(tx => {
+      tx.executeSql(
+        'CREATE TABLE IF NOT EXISTS ' +
+          'UserSubreddits ' +
+          '(accountID TEXT, subredditID TEXT, PRIMARY KEY (accountID, subredditID), FOREIGN KEY (accountID) REFERENCES Users (accountID) ON DELETE CASCADE ON UPDATE NO ACTION, FOREIGN KEY (subredditID) REFERENCES Subreddits (subredditID) ON DELETE CASCADE ON UPDATE NO ACTION);',
+      );
+    });
   };
   useEffect(() => {
-    CreateTable();
+    db.executeSql(`PRAGMA foreign_keys = ON`);
+    CreateTables();
     setSubredditSearch('');
     LoadSubreddits();
   }, []);
@@ -78,12 +88,16 @@ const SubredditSelect = ({
       });
     };
     await db.transaction(async tx => {
-      await tx.executeSql(`SELECT * FROM Subreddits`, [], (tx, results) => {
-        var len = results.rows.length;
-        subredditLoop(len, results).then(() => {
-          setSubreddits(subredditsTemp);
-        });
-      });
+      await tx.executeSql(
+        `SELECT * FROM Subreddits LEFT JOIN UserSubreddits ON Subreddits.subredditID = UserSubreddits.subredditID WHERE UserSubreddits.accountID='${currAccountID}'`,
+        [],
+        (tx, results) => {
+          var len = results.rows.length;
+          subredditLoop(len, results).then(() => {
+            setSubreddits(subredditsTemp);
+          });
+        },
+      );
     });
   };
   const ValidSubreddit = async subreddit => {
@@ -168,6 +182,12 @@ const SubredditSelect = ({
           needFlair,
           spoilersEnabled,
         ],
+      );
+    });
+    await db.transaction(async tx => {
+      await tx.executeSql(
+        `INSERT OR REPLACE INTO UserSubreddits (accountID, subredditID) VALUES (?,?)`,
+        [currAccountID, id],
       );
     });
     let allowed = await CheckIfAllowed({
@@ -261,7 +281,7 @@ const SubredditSelect = ({
             FetchSubredditData(subreddit);
           } else {
             console.log('subreddit already in database');
-            let allowed = CheckIfAllowed(results.rows.item(0));
+            let allowed = await CheckIfAllowed(results.rows.item(0));
             if (allowed) {
               let subredditCopy = subreddits.filter(sub => {
                 return sub.name == subreddit;

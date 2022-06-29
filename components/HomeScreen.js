@@ -62,6 +62,11 @@ const HomeScreen = ({
       await tx.executeSql(`DELETE FROM Subreddits`);
     });
   };
+  const ClearUserSubredditsTable = async () => {
+    await db.transaction(async tx => {
+      await tx.executeSql(`DELETE FROM UserSubreddits`);
+    });
+  };
   const AddAccount = async () => {
     try {
       const authState = await authorize(config);
@@ -149,6 +154,8 @@ const HomeScreen = ({
   useEffect(() => {
     // ClearUserTable();
     // ClearSubredditsTable();
+    // ClearUserSubredditsTable();
+    db.executeSql('PRAGMA foreign_keys = ON');
     if (loading) {
       LoadAccount();
     }

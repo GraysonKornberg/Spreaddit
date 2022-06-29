@@ -58,9 +58,9 @@ const SubredditListTemp = ({subreddits, setSubreddits, CheckIfAllowed}) => {
             style={styles.icon}
             onPress={() => toggleSubreddit(subreddit)}>
             {subreddit.selected ? (
-              <Icon name="check-square" color={'black'} size={40} />
+              <Icon name="check-square" size={40} />
             ) : (
-              <Icon name="square" color={'black'} size={40} />
+              <Icon name="square" size={40} />
             )}
           </TouchableOpacity>
         </View>

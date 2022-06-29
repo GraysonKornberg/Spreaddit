@@ -118,6 +118,7 @@ const AccountList = ({refreshAccount, setIsSignedIn, setRefreshAccount}) => {
     }
   };
   useEffect(() => {
+    db.executeSql('PRAGMA foreign_keys = ON');
     setLoading(true);
   }, [refreshAccount]);
   useEffect(() => {
