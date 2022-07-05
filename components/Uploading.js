@@ -210,7 +210,7 @@ const Uploading = ({
     const mapLoop = async () => {
       if (postType == 'ImagePost') {
         const promises = await subreddits.map(async subreddit => {
-          await UploadImage(subreddit);
+          if (subreddit.selected) await UploadImage(subreddit);
         });
         await Promise.all(promises).then(() => {
           console.log('done');
@@ -218,7 +218,7 @@ const Uploading = ({
         });
       } else if (postType == 'TextPost') {
         const promises = await subreddits.map(async subreddit => {
-          await UploadText(subreddit);
+          if (subreddit.selected) await UploadText(subreddit);
         });
         await Promise.all(promises).then(() => {
           console.log('done');
@@ -226,7 +226,7 @@ const Uploading = ({
         });
       } else if (postType == 'LinkPost') {
         const promises = await subreddits.map(async subreddit => {
-          await UploadLink(subreddit);
+          if (subreddit.selected) await UploadLink(subreddit);
         });
         await Promise.all(promises).then(() => {
           console.log('done');
@@ -234,7 +234,7 @@ const Uploading = ({
         });
       } else if (postType == 'VideoPost') {
         const promises = await subreddits.map(async subreddit => {
-          await UploadVideo(subreddit);
+          if (subreddit.selected) await UploadVideo(subreddit);
         });
         await Promise.all(promises).then(() => {
           console.log('done');
@@ -260,7 +260,7 @@ const Uploading = ({
         text: 'Submissions Complete',
         duration: Snackbar.LENGTH_INDEFINITE,
         action: {
-          text: 'X',
+          text: 'CLOSE',
           onPress: () => {
             Snackbar.dismiss();
           },

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {
   View,
   Text,
@@ -14,6 +14,7 @@ import TextPost from './TextPost';
 import ImagePost from './ImagePost';
 import VideoPost from './VideoPost';
 import LinkPost from './LinkPost';
+import Snackbar from 'react-native-snackbar';
 
 const Post = ({
   navigation,
@@ -34,7 +35,24 @@ const Post = ({
   setSpoilerToggle,
   thumbnailPath,
   setThumbnailPath,
+  setSubreddits,
+  setSubredditSearch,
 }) => {
+  const StartOver = () => {
+    setTitle('');
+    setPostType('TextPost');
+    setText('');
+    setLink('');
+    setFilePath({});
+    setNsfwToggle(false);
+    setSpoilerToggle(false);
+    setThumbnailPath('');
+    setSubreddits([]);
+    setSubredditSearch('');
+  };
+  useEffect(() => {
+    StartOver();
+  }, []);
   const textPostSelected =
     postType == 'TextPost'
       ? styles.postTypeButtonSelected
@@ -147,14 +165,41 @@ const Post = ({
           style={styles.nextButton}
           onPress={() => {
             if (title.trim().length == 0) {
-              alert('Title cannot be left blank');
+              Snackbar.show({
+                text: 'Title cannot be left blank',
+                duration: Snackbar.LENGTH_INDEFINITE,
+                action: {
+                  text: 'CLOSE',
+                  onPress: () => {
+                    Snackbar.dismiss();
+                  },
+                },
+              });
             } else if (
               (postType == 'ImagePost' || postType == 'VideoPost') &&
               Object.keys(filePath).length == 0
             ) {
-              alert('Must select media file');
+              Snackbar.show({
+                text: 'Must select media file',
+                duration: Snackbar.LENGTH_INDEFINITE,
+                action: {
+                  text: 'CLOSE',
+                  onPress: () => {
+                    Snackbar.dismiss();
+                  },
+                },
+              });
             } else if (postType == 'LinkPost' && link.length == 0) {
-              alert('URL cannot be left blank');
+              Snackbar.show({
+                text: 'URL cannot be left blank',
+                duration: Snackbar.LENGTH_INDEFINITE,
+                action: {
+                  text: 'CLOSE',
+                  onPress: () => {
+                    Snackbar.dismiss();
+                  },
+                },
+              });
             } else navigation.push('Select Subreddits');
           }}>
           <Text style={styles.nextButtonText}>Select Subreddits</Text>

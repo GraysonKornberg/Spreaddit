@@ -53,18 +53,39 @@ const HomeScreen = ({
   const [accountsPopup, setAccountsPopup] = useState(false);
   const [refreshAccount, setRefreshAccount] = useState(false);
   const ClearUserTable = async () => {
+    db.executeSql(`DROP TABLE IF EXISTS Users`);
     await db.transaction(async tx => {
       await tx.executeSql(`DELETE FROM Users`);
     });
   };
   const ClearSubredditsTable = async () => {
+    db.executeSql(`DROP TABLE IF EXISTS Subreddits`);
     await db.transaction(async tx => {
       await tx.executeSql(`DELETE FROM Subreddits`);
     });
   };
   const ClearUserSubredditsTable = async () => {
+    db.executeSql(`DROP TABLE IF EXISTS UserSubreddits`);
     await db.transaction(async tx => {
       await tx.executeSql(`DELETE FROM UserSubreddits`);
+    });
+  };
+  const ClearGroupsSubredditsTable = async () => {
+    db.executeSql(`DROP TABLE IF EXISTS GroupsSubreddits`);
+    await db.transaction(async tx => {
+      await tx.executeSql(`DELETE FROM GroupsSubreddits`);
+    });
+  };
+  const ClearGroupsTable = async () => {
+    db.executeSql(`DROP TABLE IF EXISTS Groups`);
+    await db.transaction(async tx => {
+      await tx.executeSql(`DELETE FROM Groups`);
+    });
+  };
+  const ClearUserGroupsTable = async () => {
+    db.executeSql(`DROP TABLE IF EXISTS UserGroups`);
+    await db.transaction(async tx => {
+      await tx.executeSql(`DELETE FROM UserGroups`);
     });
   };
   const AddAccount = async () => {
@@ -87,12 +108,19 @@ const HomeScreen = ({
           const username = data.data.name;
           const refreshToken = authState.refreshToken;
           await db.transaction(async tx => {
-            await tx.executeSql(`UPDATE Users SET signedIn=0 WHERE signedIn=1`);
+            await tx.executeSql(
+              `UPDATE Users SET signedIn=0 WHERE signedIn=1`,
+              [],
+              () => {},
+              error => console.log(error),
+            );
           });
           await db.transaction(async tx => {
             await tx.executeSql(
               'INSERT OR REPLACE INTO Users (accountID, username, refreshToken, signedIn) VALUES (?,?,?,?)',
               [accountID, username, refreshToken, '1'],
+              () => {},
+              error => console.log(error),
             );
           });
           setRefreshAccount(!refreshAccount);
@@ -103,6 +131,7 @@ const HomeScreen = ({
     }
   };
   const DebugData = async () => {
+    console.log('debugging');
     await db.transaction(async tx => {
       await tx.executeSql(`SELECT * FROM Users`, [], (tx, results) => {
         if (results.rows.length == 0) {
@@ -148,6 +177,53 @@ const HomeScreen = ({
             DebugData();
           }
         },
+        error => {
+          console.log(error);
+        },
+      );
+    });
+  };
+  const CreateTables = async () => {
+    db.transaction(tx => {
+      tx.executeSql(
+        'CREATE TABLE IF NOT EXISTS ' +
+          'Users ' +
+          '(accountID TEXT PRIMARY KEY, username TEXT, refreshToken TEXT, signedIn INTEGER);',
+      );
+    });
+    db.transaction(async tx => {
+      tx.executeSql(
+        'CREATE TABLE IF NOT EXISTS ' +
+          'Groups ' +
+          '(groupName TEXT PRIMARY KEY);',
+      );
+    });
+    db.transaction(async tx => {
+      tx.executeSql(
+        'CREATE TABLE IF NOT EXISTS ' +
+          'GroupsSubreddits ' +
+          '(groupName TEXT, subredditID TEXT, accountID TEXT, PRIMARY KEY (groupName, subredditID, accountID), FOREIGN KEY (groupName) REFERENCES Groups (groupName) ON DELETE CASCADE ON UPDATE NO ACTION, FOREIGN KEY (subredditID) REFERENCES Subreddits (subredditID) ON DELETE CASCADE ON UPDATE NO ACTION, FOREIGN KEY (accountID) REFERENCES Users (accountID) ON DELETE CASCADE ON UPDATE NO ACTION);',
+      );
+    });
+    db.transaction(async tx => {
+      tx.executeSql(
+        'CREATE TABLE IF NOT EXISTS ' +
+          'UserGroups ' +
+          '(accountID TEXT, groupName TEXT, PRIMARY KEY (accountID, groupName), FOREIGN KEY (accountID) REFERENCES Users (accountID) ON DELETE CASCADE ON UPDATE NO ACTION, FOREIGN KEY (groupName) REFERENCES Groups (groupName) ON DELETE CASCADE ON UPDATE NO ACTION);',
+      );
+    });
+    db.transaction(tx => {
+      tx.executeSql(
+        'CREATE TABLE IF NOT EXISTS ' +
+          'Subreddits ' +
+          '(subredditID TEXT PRIMARY KEY, subredditName TEXT, submissionType TEXT, allowImages INTEGER, allowVideos INTEGER, bodyRestrictionPolicy TEXT, needFlair INTEGER, spoilersEnabled INTEGER);',
+      );
+    });
+    db.transaction(tx => {
+      tx.executeSql(
+        'CREATE TABLE IF NOT EXISTS ' +
+          'UserSubreddits ' +
+          '(accountID TEXT, subredditID TEXT, PRIMARY KEY (accountID, subredditID), FOREIGN KEY (accountID) REFERENCES Users (accountID) ON DELETE CASCADE ON UPDATE NO ACTION, FOREIGN KEY (subredditID) REFERENCES Subreddits (subredditID) ON DELETE CASCADE ON UPDATE NO ACTION);',
       );
     });
   };
@@ -155,6 +231,10 @@ const HomeScreen = ({
     // ClearUserTable();
     // ClearSubredditsTable();
     // ClearUserSubredditsTable();
+    // ClearGroupsTable();
+    // ClearGroupsSubredditsTable();
+    // ClearUserGroupsTable();
+    CreateTables();
     db.executeSql('PRAGMA foreign_keys = ON');
     if (loading) {
       LoadAccount();
@@ -225,11 +305,17 @@ const HomeScreen = ({
             </View>
           </View>
         </Modal>
-
         <TouchableOpacity
-          style={styles.button2}
+          style={styles.button1}
+          onPress={() => navigation.push('Presets')}>
+          <Text style={{color: 'black', fontSize: 20, fontWeight: 'bold'}}>
+            Presets
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button1}
           onPress={() => setAccountsPopup(true)}>
-          <Text style={{color: 'black', fontSize: 17, fontWeight: 'bold'}}>
+          <Text style={{color: 'black', fontSize: 20, fontWeight: 'bold'}}>
             Accounts
           </Text>
         </TouchableOpacity>
@@ -260,6 +346,13 @@ const styles = StyleSheet.create({
   },
   button2: {
     alignItems: 'center',
+    backgroundColor: '#cee3f8',
+    padding: 25,
+    borderRadius: 10,
+  },
+  button3: {
+    alignItems: 'center',
+    marginTop: 20,
     backgroundColor: '#cee3f8',
     padding: 25,
     borderRadius: 10,

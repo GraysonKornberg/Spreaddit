@@ -86,6 +86,41 @@ const LoginScreen = ({navigation, setIsSignedIn, setAccessToken}) => {
           '(accountID TEXT PRIMARY KEY, username TEXT, refreshToken TEXT, signedIn INTEGER);',
       );
     });
+    db.transaction(async tx => {
+      tx.executeSql(
+        'CREATE TABLE IF NOT EXISTS ' +
+          'Groups ' +
+          '(groupName TEXT PRIMARY KEY);',
+      );
+    });
+    db.transaction(async tx => {
+      tx.executeSql(
+        'CREATE TABLE IF NOT EXISTS ' +
+          'GroupsSubreddits ' +
+          '(groupName TEXT, subredditID TEXT, accountID TEXT, PRIMARY KEY (groupName, subredditID, accountID), FOREIGN KEY (groupName) REFERENCES Groups (groupName) ON DELETE CASCADE ON UPDATE NO ACTION, FOREIGN KEY (subredditID) REFERENCES Subreddits (subredditID) ON DELETE CASCADE ON UPDATE NO ACTION, FOREIGN KEY (accountID) REFERENCES Users (accountID) ON DELETE CASCADE ON UPDATE NO ACTION);',
+      );
+    });
+    db.transaction(async tx => {
+      tx.executeSql(
+        'CREATE TABLE IF NOT EXISTS ' +
+          'UserGroups ' +
+          '(accountID TEXT, groupName TEXT, PRIMARY KEY (accountID, groupName), FOREIGN KEY (accountID) REFERENCES Users (accountID) ON DELETE CASCADE ON UPDATE NO ACTION, FOREIGN KEY (groupName) REFERENCES Groups (groupName) ON DELETE CASCADE ON UPDATE NO ACTION);',
+      );
+    });
+    db.transaction(tx => {
+      tx.executeSql(
+        'CREATE TABLE IF NOT EXISTS ' +
+          'Subreddits ' +
+          '(subredditID TEXT PRIMARY KEY, subredditName TEXT, submissionType TEXT, allowImages INTEGER, allowVideos INTEGER, bodyRestrictionPolicy TEXT, needFlair INTEGER, spoilersEnabled INTEGER);',
+      );
+    });
+    db.transaction(tx => {
+      tx.executeSql(
+        'CREATE TABLE IF NOT EXISTS ' +
+          'UserSubreddits ' +
+          '(accountID TEXT, subredditID TEXT, PRIMARY KEY (accountID, subredditID), FOREIGN KEY (accountID) REFERENCES Users (accountID) ON DELETE CASCADE ON UPDATE NO ACTION, FOREIGN KEY (subredditID) REFERENCES Subreddits (subredditID) ON DELETE CASCADE ON UPDATE NO ACTION);',
+      );
+    });
   };
   return (
     <View style={styles.container}>

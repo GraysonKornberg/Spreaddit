@@ -9,6 +9,8 @@ import SubredditSelect from './components/SubredditSelect';
 import SubredditOptions from './components/SubredditOptions';
 import SubredditSettings from './components/SubredditSettings';
 import Uploading from './components/Uploading';
+import Preset from './components/Preset';
+import PresetSettings from './components/PresetSettings';
 
 const Stack = createNativeStackNavigator();
 
@@ -67,6 +69,18 @@ const App = () => {
             />
           )}
         </Stack.Screen>
+        <Stack.Screen name="Presets">
+          {props => <Preset {...props} currAccountID={currAccountID} />}
+        </Stack.Screen>
+        <Stack.Screen name="Preset Settings">
+          {props => (
+            <PresetSettings
+              {...props}
+              currAccountID={currAccountID}
+              accessToken={accessToken}
+            />
+          )}
+        </Stack.Screen>
         <Stack.Screen name="Create Post">
           {props => (
             <Post
@@ -88,6 +102,8 @@ const App = () => {
               setNsfwToggle={setNsfwToggle}
               spoilerToggle={spoilerToggle}
               setSpoilerToggle={setSpoilerToggle}
+              setSubreddits={setSubreddits}
+              setSubredditSearch={setSubredditSearch}
             />
           )}
         </Stack.Screen>

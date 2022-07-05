@@ -13,6 +13,7 @@ import SubredditListTemp from './SubredditListTemp';
 import Snackbar from 'react-native-snackbar';
 import SQLite from 'react-native-sqlite-storage';
 
+SQLite.enablePromise(false);
 const db = SQLite.openDatabase(
   {
     name: 'mainDB',
@@ -41,6 +42,7 @@ const SubredditSelect = ({
   currAccountID,
   setCurrAccountID,
 }) => {
+  const [groups, setGroups] = useState([]);
   const CreateTables = () => {
     db.transaction(tx => {
       tx.executeSql(
@@ -62,7 +64,53 @@ const SubredditSelect = ({
     CreateTables();
     setSubredditSearch('');
     LoadSubreddits();
+    LoadGroups();
   }, []);
+  const LoadGroups = async () => {
+    console.log('loading groups');
+    let groupsTemp = [];
+    const groupLoop = async (len, results) => {
+      return new Promise(async (resolve, reject) => {
+        const subredditsLoop = async () => {
+          for (let i = 0; i < len; i++) {
+            let GroupSubreddits;
+            let _groupName = results.rows.item(i).groupName;
+            let _promise = await new Promise(async (resolve, reject) => {
+              await db.transaction(async tx => {
+                await tx.executeSql(
+                  `SELECT * FROM Subreddits LEFT JOIN GroupsSubreddits ON Subreddits.SubredditID = GroupsSubreddits.SubredditID WHERE GroupsSubreddits.groupName='${_groupName}' AND GroupsSubreddits.accountID='${currAccountID}'`,
+                  [],
+                  (tx, results) => {
+                    groupsTemp.push({
+                      name: _groupName,
+                      selected: false,
+                      subreddits: results,
+                    });
+                    resolve();
+                  },
+                  error => console.log(error),
+                );
+              });
+            });
+          }
+        };
+        await subredditsLoop();
+        resolve();
+      });
+    };
+    await db.transaction(async tx => {
+      await tx.executeSql(
+        `SELECT * FROM UserGroups WHERE UserGroups.accountID = '${currAccountID}'`,
+        [],
+        (tx, results) => {
+          var len = results.rows.length;
+          groupLoop(len, results).then(() => {
+            setGroups(groupsTemp);
+          });
+        },
+      );
+    });
+  };
   const LoadSubreddits = async () => {
     console.log('loading subreddits');
     let subredditsTemp = [];
@@ -101,23 +149,38 @@ const SubredditSelect = ({
     });
   };
   const ValidSubreddit = async subreddit => {
-    fetch(`https://www.reddit.com/r/${subreddit}.json`).then(res => {
-      if (res.status != 200) {
-        console.log('ERROR');
-        return false;
-      }
-      res.json().then(data => {
-        if (data.data.after != null) {
-          return true;
-        } else {
-          alert('Invalid subreddit. Check your spelling and try again.');
-          return false;
+    let valid = false;
+    await fetch(`https://www.reddit.com/r/${subreddit}.json`).then(
+      async res => {
+        if (res.status != 200) {
+          console.log('ERROR: res.status != 200');
+          valid = false;
         }
-      });
-    });
+        await res.json().then(async data => {
+          if (data.data.after != null) {
+            valid = true;
+            console.log(valid);
+          } else {
+            Snackbar.show({
+              text: 'Invalid Subreddit',
+              duration: Snackbar.LENGTH_INDEFINITE,
+              action: {
+                text: 'CLOSE',
+                onPress: () => {
+                  Snackbar.dismiss();
+                },
+              },
+            });
+            valid = false;
+          }
+        });
+      },
+    );
+    return valid;
   };
   const FetchSubredditData = async subreddit => {
-    if (!ValidSubreddit(subreddit)) {
+    let isValidSubreddit = await ValidSubreddit(subreddit);
+    if (!isValidSubreddit) {
       return;
     }
     let submissionType = '';
@@ -223,19 +286,47 @@ const SubredditSelect = ({
     if (postType == 'TextPost') {
       if (subreddit.submissionType == 'link') {
         allowed = false;
-        alert(`This subreddit doesn't allow text posts`);
+        Snackbar.show({
+          text: subreddit.subredditName + ` doesn't allow text posts`,
+          duration: Snackbar.LENGTH_INDEFINITE,
+          action: {
+            text: 'CLOSE',
+            onPress: () => {
+              Snackbar.dismiss();
+            },
+          },
+        });
       } else {
         if (text.length > 0) {
           if (subreddit.bodyRestrictionPolicy == 'notAllowed') {
             allowed = false;
-            alert(`This subreddit does not allow body text.`);
+            console.log(subreddit);
+            Snackbar.show({
+              text: subreddit.subredditName + ` does not allow body text.`,
+              duration: Snackbar.LENGTH_INDEFINITE,
+              action: {
+                text: 'CLOSE',
+                onPress: () => {
+                  Snackbar.dismiss();
+                },
+              },
+            });
           } else {
             allowed = true;
           }
         } else if (text.length == 0) {
           if (subreddit.submissionType == 'required') {
             allowed = false;
-            alert(`This subreddit requires body text`);
+            Snackbar.show({
+              text: subreddit.subredditName + ` requires body text`,
+              duration: Snackbar.LENGTH_INDEFINITE,
+              action: {
+                text: 'CLOSE',
+                onPress: () => {
+                  Snackbar.dismiss();
+                },
+              },
+            });
           } else {
             allowed = true;
           }
@@ -243,22 +334,49 @@ const SubredditSelect = ({
       }
     } else if (postType == 'ImagePost') {
       if (subreddit.allowImages == 0) {
-        alowed = false;
-        alert(`This subreddit doesn't allow image posts.`);
+        allowed = false;
+        Snackbar.show({
+          text: subreddit.subredditName + ` doesn't allow image posts.`,
+          duration: Snackbar.LENGTH_INDEFINITE,
+          action: {
+            text: 'CLOSE',
+            onPress: () => {
+              Snackbar.dismiss();
+            },
+          },
+        });
       } else {
         allowed = true;
       }
     } else if (postType == 'VideoPost') {
       if (subreddit.allowVideos == 0) {
         allowed = false;
-        alert(`This subreddit doesn't allow video posts.`);
+        Snackbar.show({
+          text: subreddit.subredditName + ` doesn't allow video posts.`,
+          duration: Snackbar.LENGTH_INDEFINITE,
+          action: {
+            text: 'CLOSE',
+            onPress: () => {
+              Snackbar.dismiss();
+            },
+          },
+        });
       } else {
         allowed = true;
       }
     } else if (postType == 'LinkPost') {
       if (subreddit.submissionType == 'self') {
         allowed = false;
-        alert("This subreddit doesn't allow link posts.");
+        Snackbar.show({
+          text: subreddit.subredditName + ` doesn't allow link posts`,
+          duration: Snackbar.LENGTH_INDEFINITE,
+          action: {
+            text: 'CLOSE',
+            onPress: () => {
+              Snackbar.dismiss();
+            },
+          },
+        });
       } else {
         allowed = true;
       }
@@ -266,14 +384,28 @@ const SubredditSelect = ({
     return allowed;
   };
   const AddSubredditSearch = async subreddit => {
-    if (subreddits.some(sub => sub.name == subreddit && sub.selected)) {
-      alert('Subreddit already added');
+    if (
+      subreddits.some(
+        sub =>
+          sub.name.toLowerCase() == subreddit.toLowerCase() && sub.selected,
+      )
+    ) {
+      Snackbar.show({
+        text: 'Subreddit already added',
+        duration: Snackbar.LENGTH_INDEFINITE,
+        action: {
+          text: 'CLOSE',
+          onPress: () => {
+            Snackbar.dismiss();
+          },
+        },
+      });
       setSubredditSearch('');
       return;
     }
     await db.transaction(async tx => {
       await tx.executeSql(
-        `SELECT * FROM Subreddits WHERE subredditName='${subreddit}'`,
+        `SELECT * FROM Subreddits WHERE subredditName='${subreddit}' COLLATE NOCASE`,
         [],
         async (tx, results) => {
           if (results.rows.length == 0) {
@@ -282,17 +414,57 @@ const SubredditSelect = ({
           } else {
             console.log('subreddit already in database');
             let allowed = await CheckIfAllowed(results.rows.item(0));
+            await db.transaction(async tx => {
+              await tx.executeSql(
+                `INSERT OR REPLACE INTO UserSubreddits (accountID, subredditID) VALUES (?,?)`,
+                [currAccountID, results.rows.item(0).subredditID],
+              );
+            });
             if (allowed) {
-              let subredditCopy = subreddits.filter(sub => {
-                return sub.name == subreddit;
+              await db.transaction(async tx => {
+                await tx.executeSql(
+                  `SELECT * FROM Subreddits LEFT JOIN UserSubreddits ON Subreddits.subredditID=UserSubreddits.subredditID WHERE accountID='${currAccountID}' AND subredditName='${subreddit}' COLLATE NOCASE`,
+                  [],
+                  async (tx, results2) => {
+                    if (results2.rows.length == 0) {
+                      setSubreddits([
+                        {
+                          name: results.rows.item(0).subredditName,
+                          needFlair:
+                            results.rows.item(0).needFlair == 0 ? false : true,
+                          flairList: [],
+                          selectedFlair: '',
+                          nsfw: nsfwToggle,
+                          spoiler: spoilerToggle,
+                          spoilerEnabled: results.rows.item(0).spoilersEnabled,
+                          title: title,
+                          text: text,
+                          link: link,
+                          filePath: filePath,
+                          selected: true,
+                        },
+                        ...subreddits,
+                      ]);
+                    } else {
+                      let subredditCopy = subreddits.filter(sub => {
+                        return (
+                          sub.name.toLowerCase() == subreddit.toLowerCase()
+                        );
+                      });
+                      subredditCopy[0].selected = true;
+                      const index = subreddits.findIndex(
+                        sub =>
+                          sub.name.toLowerCase() == subreddit.toLowerCase(),
+                      );
+                      setSubreddits([
+                        subredditCopy[0],
+                        ...subreddits.slice(0, index),
+                        ...subreddits.slice(index + 1),
+                      ]);
+                    }
+                  },
+                );
               });
-              subredditCopy[0].selected = true;
-              const index = subreddits.findIndex(sub => sub.name == subreddit);
-              setSubreddits([
-                subredditCopy[0],
-                ...subreddits.slice(0, index),
-                ...subreddits.slice(index + 1),
-              ]);
             }
           }
         },
@@ -317,7 +489,16 @@ const SubredditSelect = ({
               if (subredditSearch) {
                 AddSubredditSearch(subredditSearch);
               } else {
-                alert('Field cannot be left blank');
+                Snackbar.show({
+                  text: 'Field cannot be left blank',
+                  duration: Snackbar.LENGTH_INDEFINITE,
+                  action: {
+                    text: 'CLOSE',
+                    onPress: () => {
+                      Snackbar.dismiss();
+                    },
+                  },
+                });
               }
             }}>
             <Text style={styles.addButtonText}>Add</Text>
@@ -329,6 +510,8 @@ const SubredditSelect = ({
               CheckIfAllowed={CheckIfAllowed}
               style={styles.subredditsContainer}
               subreddits={subreddits}
+              groups={groups}
+              setGroups={setGroups}
               setSubreddits={setSubreddits}
             />
           </ScrollView>

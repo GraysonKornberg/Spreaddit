@@ -6047,6 +6047,11 @@
   "resolved" "https://registry.npmjs.org/react-native-create-thumbnail/-/react-native-create-thumbnail-1.5.1.tgz"
   "version" "1.5.1"
 
+"react-native-dialog@^9.2.2":
+  "integrity" "sha512-d2w3fyqB6G8Os0DYJKnfVl6PgqQwplW8dHSvzkQpczXzmX5V4BXOJTTXqoiKwI+nsS6QEHYb6Bk8VG7vV9WuXQ=="
+  "resolved" "https://registry.npmjs.org/react-native-dialog/-/react-native-dialog-9.2.2.tgz"
+  "version" "9.2.2"
+
 "react-native-fs@^2.20.0":
   "integrity" "sha512-VkTBzs7fIDUiy/XajOSNk0XazFE9l+QlMAce7lGuebZcag5CnjszB+u4BdqzwaQOdcYb5wsJIsqq4kxInIRpJQ=="
   "resolved" "https://registry.npmjs.org/react-native-fs/-/react-native-fs-2.20.0.tgz"
