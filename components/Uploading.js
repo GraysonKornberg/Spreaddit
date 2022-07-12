@@ -297,10 +297,12 @@ const Uploading = ({
     navigation.navigate('Spreaddit');
   };
   return (
-    <View>
+    <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
       {complete ? (
-        <TouchableOpacity onPress={() => StartOver()}>
-          <Text>Home</Text>
+        <TouchableOpacity style={styles.button1} onPress={() => StartOver()}>
+          <Text style={{color: 'black', fontSize: 20, fontWeight: 'bold'}}>
+            Home
+          </Text>
         </TouchableOpacity>
       ) : (
         <Text>Uploading...</Text>
@@ -310,6 +312,14 @@ const Uploading = ({
 };
 
 const styles = StyleSheet.create({
+  button1: {
+    alignItems: 'center',
+    backgroundColor: '#cee3f8',
+    padding: 25,
+    borderRadius: 10,
+    marginBottom: 30,
+    width: 300,
+  },
   imageStyle: {
     width: 200,
     height: 200,

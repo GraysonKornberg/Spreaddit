@@ -108,13 +108,7 @@ const Preset = ({navigation, currAccountID}) => {
     ) {
       Snackbar.show({
         text: 'Preset with this name already exists',
-        duration: Snackbar.LENGTH_INDEFINITE,
-        action: {
-          text: 'CLOSE',
-          onPress: () => {
-            Snackbar.dismiss();
-          },
-        },
+        duration: Snackbar.LENGTH_LONG,
       });
       setInputName('');
     } else {

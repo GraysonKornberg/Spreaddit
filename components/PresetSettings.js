@@ -71,13 +71,7 @@ const PresetSettings = ({navigation, route, accessToken, currAccountID}) => {
           } else {
             Snackbar.show({
               text: 'Invalid subreddit',
-              duration: Snackbar.LENGTH_INDEFINITE,
-              action: {
-                text: 'CLOSE',
-                onPress: () => {
-                  Snackbar.dismiss();
-                },
-              },
+              duration: Snackbar.LENGTH_LONG,
             });
             valid = false;
           }
@@ -176,13 +170,7 @@ const PresetSettings = ({navigation, route, accessToken, currAccountID}) => {
     ) {
       Snackbar.show({
         text: 'Subreddit already added',
-        duration: Snackbar.LENGTH_INDEFINITE,
-        action: {
-          text: 'CLOSE',
-          onPress: () => {
-            Snackbar.dismiss();
-          },
-        },
+        duration: Snackbar.LENGTH_LONG,
       });
       setSubredditSearch('');
       return;
@@ -257,13 +245,7 @@ const PresetSettings = ({navigation, route, accessToken, currAccountID}) => {
               } else {
                 Snackbar.show({
                   text: 'Field cannot be left blank',
-                  duration: Snackbar.LENGTH_INDEFINITE,
-                  action: {
-                    text: 'CLOSE',
-                    onPress: () => {
-                      Snackbar.dismiss();
-                    },
-                  },
+                  duration: Snackbar.LENGTH_LONG,
                 });
               }
             }}>

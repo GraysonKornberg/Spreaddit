@@ -10,6 +10,7 @@ import {
   Keyboard,
 } from 'react-native';
 import SubredditListTemp from './SubredditListTemp';
+import Loading from './Loading';
 import Snackbar from 'react-native-snackbar';
 import SQLite from 'react-native-sqlite-storage';
 
@@ -43,6 +44,8 @@ const SubredditSelect = ({
   setCurrAccountID,
 }) => {
   const [groups, setGroups] = useState([]);
+  const [loading1, setLoading1] = useState(true);
+  const [loading2, setLoading2] = useState(true);
   const CreateTables = () => {
     db.transaction(tx => {
       tx.executeSql(
@@ -106,6 +109,7 @@ const SubredditSelect = ({
           var len = results.rows.length;
           groupLoop(len, results).then(() => {
             setGroups(groupsTemp);
+            setLoading2(false);
           });
         },
       );
@@ -143,6 +147,7 @@ const SubredditSelect = ({
           var len = results.rows.length;
           subredditLoop(len, results).then(() => {
             setSubreddits(subredditsTemp);
+            setLoading1(false);
           });
         },
       );
@@ -163,13 +168,7 @@ const SubredditSelect = ({
           } else {
             Snackbar.show({
               text: 'Invalid Subreddit',
-              duration: Snackbar.LENGTH_INDEFINITE,
-              action: {
-                text: 'CLOSE',
-                onPress: () => {
-                  Snackbar.dismiss();
-                },
-              },
+              duration: Snackbar.LENGTH_LONG,
             });
             valid = false;
           }
@@ -288,13 +287,7 @@ const SubredditSelect = ({
         allowed = false;
         Snackbar.show({
           text: subreddit.subredditName + ` doesn't allow text posts`,
-          duration: Snackbar.LENGTH_INDEFINITE,
-          action: {
-            text: 'CLOSE',
-            onPress: () => {
-              Snackbar.dismiss();
-            },
-          },
+          duration: Snackbar.LENGTH_LONG,
         });
       } else {
         if (text.length > 0) {
@@ -303,13 +296,7 @@ const SubredditSelect = ({
             console.log(subreddit);
             Snackbar.show({
               text: subreddit.subredditName + ` does not allow body text.`,
-              duration: Snackbar.LENGTH_INDEFINITE,
-              action: {
-                text: 'CLOSE',
-                onPress: () => {
-                  Snackbar.dismiss();
-                },
-              },
+              duration: Snackbar.LENGTH_LONG,
             });
           } else {
             allowed = true;
@@ -319,13 +306,7 @@ const SubredditSelect = ({
             allowed = false;
             Snackbar.show({
               text: subreddit.subredditName + ` requires body text`,
-              duration: Snackbar.LENGTH_INDEFINITE,
-              action: {
-                text: 'CLOSE',
-                onPress: () => {
-                  Snackbar.dismiss();
-                },
-              },
+              duration: Snackbar.LENGTH_LONG,
             });
           } else {
             allowed = true;
@@ -337,13 +318,7 @@ const SubredditSelect = ({
         allowed = false;
         Snackbar.show({
           text: subreddit.subredditName + ` doesn't allow image posts.`,
-          duration: Snackbar.LENGTH_INDEFINITE,
-          action: {
-            text: 'CLOSE',
-            onPress: () => {
-              Snackbar.dismiss();
-            },
-          },
+          duration: Snackbar.LENGTH_LONG,
         });
       } else {
         allowed = true;
@@ -353,13 +328,7 @@ const SubredditSelect = ({
         allowed = false;
         Snackbar.show({
           text: subreddit.subredditName + ` doesn't allow video posts.`,
-          duration: Snackbar.LENGTH_INDEFINITE,
-          action: {
-            text: 'CLOSE',
-            onPress: () => {
-              Snackbar.dismiss();
-            },
-          },
+          duration: Snackbar.LENGTH_LONG,
         });
       } else {
         allowed = true;
@@ -369,13 +338,7 @@ const SubredditSelect = ({
         allowed = false;
         Snackbar.show({
           text: subreddit.subredditName + ` doesn't allow link posts`,
-          duration: Snackbar.LENGTH_INDEFINITE,
-          action: {
-            text: 'CLOSE',
-            onPress: () => {
-              Snackbar.dismiss();
-            },
-          },
+          duration: Snackbar.LENGTH_LONG,
         });
       } else {
         allowed = true;
@@ -392,13 +355,7 @@ const SubredditSelect = ({
     ) {
       Snackbar.show({
         text: 'Subreddit already added',
-        duration: Snackbar.LENGTH_INDEFINITE,
-        action: {
-          text: 'CLOSE',
-          onPress: () => {
-            Snackbar.dismiss();
-          },
-        },
+        duration: Snackbar.LENGTH_LONG,
       });
       setSubredditSearch('');
       return;
@@ -472,7 +429,7 @@ const SubredditSelect = ({
     });
     setSubredditSearch('');
   };
-  return (
+  return !loading1 && !loading2 ? (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
         <View style={styles.input}>
@@ -491,13 +448,7 @@ const SubredditSelect = ({
               } else {
                 Snackbar.show({
                   text: 'Field cannot be left blank',
-                  duration: Snackbar.LENGTH_INDEFINITE,
-                  action: {
-                    text: 'CLOSE',
-                    onPress: () => {
-                      Snackbar.dismiss();
-                    },
-                  },
+                  duration: Snackbar.LENGTH_LONG,
                 });
               }
             }}>
@@ -531,6 +482,8 @@ const SubredditSelect = ({
         </TouchableOpacity>
       </View>
     </TouchableWithoutFeedback>
+  ) : (
+    <Loading />
   );
 };
 

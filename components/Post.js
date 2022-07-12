@@ -167,13 +167,7 @@ const Post = ({
             if (title.trim().length == 0) {
               Snackbar.show({
                 text: 'Title cannot be left blank',
-                duration: Snackbar.LENGTH_INDEFINITE,
-                action: {
-                  text: 'CLOSE',
-                  onPress: () => {
-                    Snackbar.dismiss();
-                  },
-                },
+                duration: Snackbar.LENGTH_LONG,
               });
             } else if (
               (postType == 'ImagePost' || postType == 'VideoPost') &&
@@ -181,24 +175,12 @@ const Post = ({
             ) {
               Snackbar.show({
                 text: 'Must select media file',
-                duration: Snackbar.LENGTH_INDEFINITE,
-                action: {
-                  text: 'CLOSE',
-                  onPress: () => {
-                    Snackbar.dismiss();
-                  },
-                },
+                duration: Snackbar.LENGTH_LONG,
               });
             } else if (postType == 'LinkPost' && link.length == 0) {
               Snackbar.show({
                 text: 'URL cannot be left blank',
-                duration: Snackbar.LENGTH_INDEFINITE,
-                action: {
-                  text: 'CLOSE',
-                  onPress: () => {
-                    Snackbar.dismiss();
-                  },
-                },
+                duration: Snackbar.LENGTH_LONG,
               });
             } else navigation.push('Select Subreddits');
           }}>
